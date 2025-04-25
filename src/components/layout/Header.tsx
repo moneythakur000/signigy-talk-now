@@ -1,8 +1,14 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff, Settings } from "lucide-react";
 import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -19,7 +25,7 @@ export function Header() {
             <span className="text-white font-bold text-xl">S</span>
           </div>
           <span className="font-bold text-xl bg-gradient-to-r from-signigyx-primary to-signigyx-secondary bg-clip-text text-transparent">
-            signigyX
+            signifyX
           </span>
         </Link>
         <nav className="hidden md:flex space-x-4">
@@ -36,7 +42,25 @@ export function Header() {
             <Link to="/about">About</Link>
           </Button>
         </nav>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>
+                Language: English
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Voice Speed: Normal
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Detection Speed: Normal
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             size="sm"
             variant={isSpeaking ? "destructive" : "outline"}

@@ -7,9 +7,31 @@ import { Text, Volume } from "lucide-react";
 
 export function SignDetector() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [detectedSign, setDetectedSign] = useState<string | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [handDetected, setHandDetected] = useState(false);
+  
+  // Mock hand keypoints for demonstration
+  const drawHandKeypoints = (ctx: CanvasRenderingContext2D) => {
+    if (!handDetected) return;
+    
+    // Draw keypoints (this is a simplified example)
+    const keypoints = [
+      { x: 100, y: 100 }, // thumb base
+      { x: 120, y: 90 },  // thumb joint
+      { x: 140, y: 80 },  // thumb tip
+      // ... more keypoints would be added here in real implementation
+    ];
+    
+    ctx.fillStyle = '#00ff00';
+    keypoints.forEach(point => {
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+  };
   
   // Start the webcam stream
   const startWebcam = async () => {
@@ -42,20 +64,39 @@ export function SignDetector() {
       videoRef.current.srcObject = null;
       setIsDetecting(false);
       setDetectedSign(null);
+      setHandDetected(false);
     }
   };
 
-  // Mock sign detection (this would be replaced with actual ML detection)
+  // Mock sign detection with hand presence detection
   useEffect(() => {
     if (!isDetecting) return;
     
     const signs = ["A", "B", "C", "Hello", "Yes", "No", "Thank you", "I love you"];
     
     const detectionInterval = setInterval(() => {
-      // In a real app, this would be replaced with actual sign detection logic
-      const randomSignIndex = Math.floor(Math.random() * signs.length);
-      setDetectedSign(signs[randomSignIndex]);
-    }, 3000);
+      // Simulate hand detection
+      const isHandPresent = Math.random() > 0.3;
+      setHandDetected(isHandPresent);
+      
+      if (isHandPresent) {
+        const randomSignIndex = Math.floor(Math.random() * signs.length);
+        setDetectedSign(signs[randomSignIndex]);
+      } else {
+        setDetectedSign(null);
+      }
+      
+      // Update canvas with keypoints
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          if (isHandPresent) {
+            drawHandKeypoints(ctx);
+          }
+        }
+      }
+    }, 1000);
     
     return () => clearInterval(detectionInterval);
   }, [isDetecting]);
@@ -72,7 +113,7 @@ export function SignDetector() {
   return (
     <div className="flex flex-col gap-4">
       <Card className="detection-box">
-        <div className="webcam-container bg-gray-900">
+        <div className="webcam-container bg-gray-900 relative">
           {!isDetecting && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 text-white flex-col gap-4">
               <p className="text-xl font-medium">Camera access required</p>
@@ -86,14 +127,15 @@ export function SignDetector() {
             muted 
             className="w-full h-full object-cover"
           />
-          {isDetecting && (
-            <div className="detection-overlay">
-              {/* This could contain guide overlays, hand position guides, etc */}
-            </div>
-          )}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 pointer-events-none"
+            width={640}
+            height={480}
+          />
         </div>
         
-        {detectedSign && (
+        {detectedSign && handDetected && (
           <div className="detection-result">
             <span className="flex-1 text-center">{detectedSign}</span>
             <Button 
@@ -119,7 +161,7 @@ export function SignDetector() {
           </Button>
         )}
         
-        {detectedSign && (
+        {detectedSign && handDetected && (
           <Button onClick={speakDetectedSign} variant="outline">
             <Volume size={16} className="mr-2" />
             Speak
