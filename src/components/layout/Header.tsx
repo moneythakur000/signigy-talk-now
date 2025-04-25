@@ -1,7 +1,7 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Settings } from "lucide-react";
+import { Mic, MicOff, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -9,12 +9,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 export function Header() {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSpeech = () => {
     setIsSpeaking(!isSpeaking);
+  };
+  
+  const handleLogout = () => {
+    localStorage.removeItem("signifyX-user");
+    toast.success("Logged out successfully");
+    navigate("/login");
   };
 
   return (
@@ -70,6 +78,14 @@ export function Header() {
             <span className="ml-2 hidden sm:inline">
               {isSpeaking ? "Speech Off" : "Speech On"}
             </span>
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleLogout}
+          >
+            <LogOut size={16} />
+            <span className="ml-2 hidden sm:inline">Logout</span>
           </Button>
         </div>
       </div>

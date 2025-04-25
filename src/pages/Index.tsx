@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { SignDetector } from "@/components/SignDetector";
 import { SignGallery } from "@/components/SignGallery";
@@ -7,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Index = () => {
+  const [detectedSigns, setDetectedSigns] = useState<string[]>([]);
+  
+  // This function would be called when a sign is detected
+  const handleSignDetection = (sign: string) => {
+    setDetectedSigns(prev => [...prev, sign]);
+  };
+  
   return (
     <Layout>
       <section className="py-12 bg-gradient-to-r from-signigyx-primary to-signigyx-secondary">
@@ -15,7 +23,7 @@ const Index = () => {
             Sign Language Detection Made Easy
           </h1>
           <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
-            signigyX helps you detect sign language gestures in real-time, making communication more accessible for everyone.
+            signifyX helps you detect sign language gestures in real-time, making communication more accessible for everyone.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button asChild size="lg" variant="secondary">
@@ -46,12 +54,12 @@ const Index = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Text to Speech</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              Convert text to speech to help with pronunciation and communication.
+              Convert detected signs to speech or enter your own text. View your detection history and easily create sentences.
             </p>
           </div>
           
           <div className="max-w-2xl mx-auto">
-            <TextToSpeech />
+            <TextToSpeech detectedSigns={detectedSigns} />
           </div>
         </div>
       </section>
