@@ -76,10 +76,10 @@ export function SignDetector() {
     
     const { wrist, thumb, fingers } = generateHandKeypoints();
     
-    ctx.strokeStyle = '#00FF00';
     ctx.lineWidth = 2;
-    
+    ctx.strokeStyle = '#00FF00';
     ctx.fillStyle = '#FF0000';
+    
     ctx.beginPath();
     ctx.arc(wrist.x, wrist.y, 4, 0, 2 * Math.PI);
     ctx.fill();
@@ -91,7 +91,6 @@ export function SignDetector() {
         ctx.lineTo(point.x, point.y);
         ctx.stroke();
       }
-      ctx.fillStyle = '#FF0000';
       ctx.beginPath();
       ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
       ctx.fill();
@@ -105,7 +104,6 @@ export function SignDetector() {
           ctx.lineTo(point.x, point.y);
           ctx.stroke();
         }
-        ctx.fillStyle = '#FF0000';
         ctx.beginPath();
         ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
         ctx.fill();
