@@ -14,12 +14,11 @@ import LoginPage from "./pages/LoginPage";
 
 const queryClient = new QueryClient();
 
-// Authentication check component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = localStorage.getItem("signifyX-user") !== null;
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
@@ -29,12 +28,11 @@ const App = () => {
   const [authChecked, setAuthChecked] = useState(false);
   
   useEffect(() => {
-    // This ensures hydration doesn't cause issues with localStorage
     setAuthChecked(true);
   }, []);
   
   if (!authChecked) {
-    return null; // Return empty until we've checked auth state
+    return null;
   }
   
   return (
@@ -45,11 +43,15 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Navigate to="/dashboard" replace />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/learn" element={<ProtectedRoute><LearnPage /></ProtectedRoute>} />
             <Route path="/practice" element={<ProtectedRoute><PracticePage /></ProtectedRoute>} />
             <Route path="/about" element={<ProtectedRoute><AboutPage /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

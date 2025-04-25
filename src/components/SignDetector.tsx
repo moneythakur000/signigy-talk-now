@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,160 +11,113 @@ export function SignDetector() {
   const [isDetecting, setIsDetecting] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [handDetected, setHandDetected] = useState(false);
-  
-  // Mock hand keypoint data with more realistic points for visualization
+
   const generateHandKeypoints = () => {
-    const centerX = 320; // Assuming camera width of 640
-    const centerY = 240; // Assuming camera height of 480
+    const centerX = 320;
+    const centerY = 240;
     
-    // Create more realistic hand structure with 21 points (simplified)
     const wrist = { x: centerX, y: centerY + 80 };
     
-    // Generate thumb points (4 points)
     const thumb = [
-      { x: wrist.x - 20, y: wrist.y - 10 },  // thumb base
-      { x: wrist.x - 30, y: wrist.y - 30 },  // thumb joint 1
-      { x: wrist.x - 35, y: wrist.y - 50 },  // thumb joint 2
-      { x: wrist.x - 30, y: wrist.y - 70 },  // thumb tip
+      { x: wrist.x - 20, y: wrist.y - 10 },
+      { x: wrist.x - 30, y: wrist.y - 30 },
+      { x: wrist.x - 35, y: wrist.y - 50 },
+      { x: wrist.x - 30, y: wrist.y - 70 },
     ];
     
-    // Generate index finger (4 points)
-    const indexFinger = [
-      { x: wrist.x - 10, y: wrist.y - 10 },  // index base
-      { x: wrist.x - 10, y: wrist.y - 40 },  // index joint 1
-      { x: wrist.x - 10, y: wrist.y - 70 },  // index joint 2
-      { x: wrist.x - 10, y: wrist.y - 90 },  // index tip
+    const fingers = [
+      {
+        name: 'index',
+        points: [
+          { x: wrist.x - 10, y: wrist.y - 10 },
+          { x: wrist.x - 10, y: wrist.y - 40 },
+          { x: wrist.x - 10, y: wrist.y - 70 },
+          { x: wrist.x - 10, y: wrist.y - 90 },
+        ]
+      },
+      {
+        name: 'middle',
+        points: [
+          { x: wrist.x, y: wrist.y - 10 },
+          { x: wrist.x, y: wrist.y - 45 },
+          { x: wrist.x, y: wrist.y - 80 },
+          { x: wrist.x, y: wrist.y - 105 },
+        ]
+      },
+      {
+        name: 'ring',
+        points: [
+          { x: wrist.x + 10, y: wrist.y - 10 },
+          { x: wrist.x + 10, y: wrist.y - 40 },
+          { x: wrist.x + 10, y: wrist.y - 70 },
+          { x: wrist.x + 10, y: wrist.y - 90 },
+        ]
+      },
+      {
+        name: 'pinky',
+        points: [
+          { x: wrist.x + 20, y: wrist.y - 10 },
+          { x: wrist.x + 20, y: wrist.y - 35 },
+          { x: wrist.x + 20, y: wrist.y - 60 },
+          { x: wrist.x + 20, y: wrist.y - 75 },
+        ]
+      }
     ];
     
-    // Generate middle finger (4 points)
-    const middleFinger = [
-      { x: wrist.x, y: wrist.y - 10 },       // middle base
-      { x: wrist.x, y: wrist.y - 45 },       // middle joint 1
-      { x: wrist.x, y: wrist.y - 80 },       // middle joint 2
-      { x: wrist.x, y: wrist.y - 105 },      // middle tip
-    ];
-    
-    // Generate ring finger (4 points)
-    const ringFinger = [
-      { x: wrist.x + 10, y: wrist.y - 10 },  // ring base
-      { x: wrist.x + 10, y: wrist.y - 40 },  // ring joint 1
-      { x: wrist.x + 10, y: wrist.y - 70 },  // ring joint 2
-      { x: wrist.x + 10, y: wrist.y - 90 },  // ring tip
-    ];
-    
-    // Generate pinky finger (4 points)
-    const pinkyFinger = [
-      { x: wrist.x + 20, y: wrist.y - 10 },  // pinky base
-      { x: wrist.x + 20, y: wrist.y - 35 },  // pinky joint 1
-      { x: wrist.x + 20, y: wrist.y - 60 },  // pinky joint 2
-      { x: wrist.x + 20, y: wrist.y - 75 },  // pinky tip
-    ];
-    
-    // Combine all points - 1 wrist + 4 points per finger * 5 fingers = 21 points
-    return [wrist, ...thumb, ...indexFinger, ...middleFinger, ...ringFinger, ...pinkyFinger];
+    return {
+      wrist,
+      thumb,
+      fingers
+    };
   };
-  
-  // Improved hand keypoints drawing function
+
   const drawHandKeypoints = (ctx: CanvasRenderingContext2D) => {
     if (!handDetected) return;
     
-    const keypoints = generateHandKeypoints();
+    const { wrist, thumb, fingers } = generateHandKeypoints();
     
-    // Draw connections between keypoints (for more realistic hand visualization)
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.6)';
+    ctx.strokeStyle = '#00FF00';
     ctx.lineWidth = 2;
     
-    // Connect thumb joints
+    ctx.fillStyle = '#FF0000';
     ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      if (i === 0) {
-        ctx.moveTo(keypoints[1].x, keypoints[1].y);
-      } else {
-        ctx.lineTo(keypoints[i + 1].x, keypoints[i + 1].y);
+    ctx.arc(wrist.x, wrist.y, 4, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    thumb.forEach((point, index) => {
+      if (index > 0) {
+        ctx.beginPath();
+        ctx.moveTo(thumb[index - 1].x, thumb[index - 1].y);
+        ctx.lineTo(point.x, point.y);
+        ctx.stroke();
       }
-    }
-    ctx.stroke();
-    
-    // Connect index finger joints
-    ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      if (i === 0) {
-        ctx.moveTo(keypoints[5].x, keypoints[5].y);
-      } else {
-        ctx.lineTo(keypoints[i + 5].x, keypoints[i + 5].y);
-      }
-    }
-    ctx.stroke();
-    
-    // Connect middle finger joints
-    ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      if (i === 0) {
-        ctx.moveTo(keypoints[9].x, keypoints[9].y);
-      } else {
-        ctx.lineTo(keypoints[i + 9].x, keypoints[i + 9].y);
-      }
-    }
-    ctx.stroke();
-    
-    // Connect ring finger joints
-    ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      if (i === 0) {
-        ctx.moveTo(keypoints[13].x, keypoints[13].y);
-      } else {
-        ctx.lineTo(keypoints[i + 13].x, keypoints[i + 13].y);
-      }
-    }
-    ctx.stroke();
-    
-    // Connect pinky finger joints
-    ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      if (i === 0) {
-        ctx.moveTo(keypoints[17].x, keypoints[17].y);
-      } else {
-        ctx.lineTo(keypoints[i + 17].x, keypoints[i + 17].y);
-      }
-    }
-    ctx.stroke();
-    
-    // Connect bases to wrist
-    ctx.beginPath();
-    ctx.moveTo(keypoints[0].x, keypoints[0].y); // Wrist
-    ctx.lineTo(keypoints[1].x, keypoints[1].y); // Thumb base
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(keypoints[0].x, keypoints[0].y); // Wrist
-    ctx.lineTo(keypoints[5].x, keypoints[5].y); // Index base
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(keypoints[0].x, keypoints[0].y); // Wrist
-    ctx.lineTo(keypoints[9].x, keypoints[9].y); // Middle base
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(keypoints[0].x, keypoints[0].y); // Wrist
-    ctx.lineTo(keypoints[13].x, keypoints[13].y); // Ring base
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(keypoints[0].x, keypoints[0].y); // Wrist
-    ctx.lineTo(keypoints[17].x, keypoints[17].y); // Pinky base
-    ctx.stroke();
-    
-    // Draw keypoints
-    keypoints.forEach((point, index) => {
-      ctx.fillStyle = index === 0 ? '#FF0000' : '#00FF00'; // Wrist is red, rest are green
+      ctx.fillStyle = '#FF0000';
       ctx.beginPath();
-      ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+      ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
       ctx.fill();
     });
+    
+    fingers.forEach(finger => {
+      finger.points.forEach((point, index) => {
+        if (index > 0) {
+          ctx.beginPath();
+          ctx.moveTo(finger.points[index - 1].x, finger.points[index - 1].y);
+          ctx.lineTo(point.x, point.y);
+          ctx.stroke();
+        }
+        ctx.fillStyle = '#FF0000';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+      
+      ctx.beginPath();
+      ctx.moveTo(wrist.x, wrist.y);
+      ctx.lineTo(finger.points[0].x, finger.points[0].y);
+      ctx.stroke();
+    });
   };
-  
-  // Start the webcam stream
+
   const startWebcam = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -180,7 +132,6 @@ export function SignDetector() {
           setHasPermission(true);
           toast.success("Camera access granted!");
           
-          // Set canvas size to match video dimensions
           if (canvasRef.current && videoRef.current) {
             canvasRef.current.width = videoRef.current.videoWidth;
             canvasRef.current.height = videoRef.current.videoHeight;
@@ -194,7 +145,6 @@ export function SignDetector() {
     }
   };
 
-  // Stop the webcam stream
   const stopWebcam = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
@@ -204,7 +154,6 @@ export function SignDetector() {
       setDetectedSign(null);
       setHandDetected(false);
       
-      // Clear canvas
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
@@ -214,14 +163,12 @@ export function SignDetector() {
     }
   };
 
-  // Mock sign detection with hand presence detection
   useEffect(() => {
     if (!isDetecting) return;
     
     const signs = ["A", "B", "C", "Hello", "Yes", "No", "Thank you", "I love you"];
     
     const detectionInterval = setInterval(() => {
-      // Simulate hand detection
       const isHandPresent = Math.random() > 0.3;
       setHandDetected(isHandPresent);
       
@@ -232,7 +179,6 @@ export function SignDetector() {
         setDetectedSign(null);
       }
       
-      // Update canvas with keypoints
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
@@ -247,7 +193,6 @@ export function SignDetector() {
     return () => clearInterval(detectionInterval);
   }, [isDetecting]);
 
-  // Text to speech for detected sign
   const speakDetectedSign = () => {
     if (detectedSign && "speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(detectedSign);
